@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="true" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" >
+	<property name="logPattern" value="[%d{yyyy/MM/dd HH:mm:ss}] %-5level | %-26.26logger{0} | %msg%n" />	
+	<property name="logFile" value="log/GlomisUa.log" />
+	<property name="logFileNamePattern" value="log/bak/%d{yyyy-MM-dd}/GlomisUa.%d{yyyy-MM-dd_HH}.%i.log" />
+	<property name="errorLogFile" value="log/GlomisUa.error.log" />
+	<property name="errorLogFileNamePattern" value="log/bak/%d{yyyy-MM-dd}/GlomisUa.error.%d{yyyy-MM-dd_HH}.%i.log" />
+	
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>${logPattern}</pattern>
+		</encoder>
+	</appender>
+		
+	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${logFile}</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+			<fileNamePattern>${logFileNamePattern}</fileNamePattern>
+			<maxFileSize>20MB</maxFileSize>
+			<maxHistory>3</maxHistory>
+			<cleanHistoryOnStart>true</cleanHistoryOnStart>
+			<totalSizeCap>4096MB</totalSizeCap>
+		</rollingPolicy>
+		<encoder>
+			<pattern>${logPattern}</pattern>
+		</encoder>
+	</appender>
+	<appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${errorLogFile}</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+			<fileNamePattern>${errorLogFileNamePattern}</fileNamePattern>
+			<maxFileSize>20MB</maxFileSize>
+			<maxHistory>48</maxHistory>
+			<totalSizeCap>100MB</totalSizeCap>
+		</rollingPolicy>
+		<encoder>
+			<pattern>${logPattern}</pattern>
+		</encoder>
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>ERROR</level>
+		</filter>
+	</appender>
+	
+	<logger name="org.springframework" level="ERROR"/>
+		
+	<root level="debug">
+		<appender-ref ref="FILE" />
+		<appender-ref ref="ERROR_FILE" />
+	</root>	
+</configuration>
