@@ -7,7 +7,7 @@
       <div class="header-right">
         <el-dropdown @command="handleLanguageChange" class="language-selector">
           <el-button>
-            <el-icon><Globe /></el-icon>
+            <el-icon><Operation /></el-icon>
             {{ currentLanguageName }}
           </el-button>
           <template #dropdown>
@@ -71,7 +71,7 @@ import { computed, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/store'
-import { Monitor, Setting, Bell, DataLine, Grid, Globe } from '@element-plus/icons-vue'
+import { Monitor, Setting, Bell, DataLine, Grid, Operation } from '@element-plus/icons-vue'
 import websocket from '@/utils/websocket'
 
 const route = useRoute()

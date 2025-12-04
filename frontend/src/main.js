@@ -32,9 +32,4 @@ app.use(ElementPlus, {
   locale: elementLocales[i18n.global.locale.value]
 })
 
-// 监听语言变化，更新Element Plus语言
-i18n.global.locale.subscribe((newLocale) => {
-  app.config.globalProperties.$elementLocale = elementLocales[newLocale]
-})
-
 app.mount('#app')
