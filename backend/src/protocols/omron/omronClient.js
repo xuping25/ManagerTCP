@@ -1,6 +1,12 @@
 const net = require('net');
-const { SerialPort } = require('serialport');
 const logger = require('../../utils/logger');
+
+let SerialPort;
+try {
+  SerialPort = require('serialport').SerialPort;
+} catch (err) {
+  logger.warn('serialport not available. Serial communication will not work.');
+}
 
 class OmronClient {
   constructor(config) {
@@ -9,6 +15,10 @@ class OmronClient {
     this.connected = false;
     this.type = config.type; // 'tcp' or 'serial'
     this.responseBuffer = Buffer.alloc(0);
+
+    if (this.type === 'serial' && !SerialPort) {
+      throw new Error('serialport module not installed. Please install it to use serial communication.');
+    }
   }
 
   async connect() {
