@@ -1,9 +1,18 @@
-const snap7 = require('node-snap7');
 const logger = require('../../utils/logger');
+
+let snap7;
+try {
+  snap7 = require('node-snap7');
+} catch (err) {
+  logger.warn('node-snap7 not available. Siemens S7 protocol will not work.');
+}
 
 class SiemensClient {
   constructor(config) {
     this.config = config;
+    if (!snap7) {
+      throw new Error('node-snap7 module not installed. Please install it to use Siemens S7 protocol.');
+    }
     this.client = new snap7.S7Client();
     this.connected = false;
   }

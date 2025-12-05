@@ -3,20 +3,20 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>报警记录</span>
+          <span>{{ t('alarm.records') }}</span>
           <div>
-            <el-select v-model="filterStatus" placeholder="筛选状态" style="width: 120px; margin-right: 10px;" @change="loadAlarms">
-              <el-option label="全部" value="" />
-              <el-option label="活跃" value="active" />
-              <el-option label="已确认" value="acknowledged" />
-              <el-option label="已清除" value="cleared" />
+            <el-select v-model="filterStatus" :placeholder="t('alarm.filterStatus')" style="width: 120px; margin-right: 10px;" @change="loadAlarms">
+              <el-option :label="t('alarm.all')" value="" />
+              <el-option :label="t('alarm.active')" value="active" />
+              <el-option :label="t('alarm.acknowledged')" value="acknowledged" />
+              <el-option :label="t('alarm.cleared')" value="cleared" />
             </el-select>
             <el-date-picker
               v-model="dateRange"
               type="datetimerange"
-              range-separator="至"
-              start-placeholder="开始时间"
-              end-placeholder="结束时间"
+              :range-separator="t('alarm.to')"
+              :start-placeholder="t('alarm.startTime')"
+              :end-placeholder="t('alarm.endTime')"
               @change="loadAlarms"
             />
           </div>
@@ -25,39 +25,39 @@
 
       <el-table :data="alarms" border stripe>
         <el-table-column prop="id" label="ID" width="60" />
-        <el-table-column prop="device_name" label="设备" width="150" />
-        <el-table-column prop="data_point_name" label="数据点" width="150" />
-        <el-table-column label="报警类型" width="100">
+        <el-table-column prop="device_name" :label="t('alarm.device')" width="150" />
+        <el-table-column prop="data_point_name" :label="t('alarm.dataPoint')" width="150" />
+        <el-table-column :label="t('alarm.alarmType')" width="100">
           <template #default="{ row }">
             <el-tag :type="row.alarm_type === 'HIGH' ? 'danger' : 'warning'" size="small">
-              {{ row.alarm_type === 'HIGH' ? '高限' : '低限' }}
+              {{ row.alarm_type === 'HIGH' ? t('alarm.high') : t('alarm.low') }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="value" label="报警值" width="100">
+        <el-table-column prop="value" :label="t('alarm.alarmValue')" width="100">
           <template #default="{ row }">
             {{ row.value.toFixed(2) }}
           </template>
         </el-table-column>
-        <el-table-column prop="threshold" label="阈值" width="100">
+        <el-table-column prop="threshold" :label="t('alarm.threshold')" width="100">
           <template #default="{ row }">
             {{ row.threshold ? row.threshold.toFixed(2) : 'N/A' }}
           </template>
         </el-table-column>
-        <el-table-column prop="message" label="报警信息" min-width="200" />
-        <el-table-column label="状态" width="100">
+        <el-table-column prop="message" :label="t('alarm.message')" min-width="200" />
+        <el-table-column :label="t('common.status')" width="100">
           <template #default="{ row }">
             <el-tag :type="getStatusType(row.status)" size="small">
               {{ getStatusText(row.status) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="created_at" label="报警时间" width="170">
+        <el-table-column prop="created_at" :label="t('alarm.alarmTime')" width="170">
           <template #default="{ row }">
             {{ formatTime(row.created_at) }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="120" fixed="right">
+        <el-table-column :label="t('common.operations')" width="120" fixed="right">
           <template #default="{ row }">
             <el-button
               v-if="row.status === 'active'"
@@ -65,7 +65,7 @@
               type="primary"
               @click="handleAcknowledge(row)"
             >
-              确认
+              {{ t('alarm.acknowledge') }}
             </el-button>
             <el-tag v-else-if="row.ack_user" size="small" type="info">
               {{ row.ack_user }}
@@ -90,7 +90,7 @@
       <el-col :span="12">
         <el-card>
           <template #header>
-            <span>报警趋势</span>
+            <span>{{ t('alarm.alarmTrend') }}</span>
           </template>
           <div ref="trendChart" style="height: 300px;"></div>
         </el-card>
@@ -99,7 +99,7 @@
       <el-col :span="12">
         <el-card>
           <template #header>
-            <span>报警统计</span>
+            <span>{{ t('alarm.alarmStatistics') }}</span>
           </template>
           <div ref="statsChart" style="height: 300px;"></div>
         </el-card>
@@ -110,10 +110,13 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { alarmApi } from '@/api/alarm'
 import moment from 'moment'
 import * as echarts from 'echarts'
+
+const { t } = useI18n()
 
 const alarms = ref([])
 const filterStatus = ref('')
@@ -142,7 +145,7 @@ const loadAlarms = async () => {
     alarms.value = res.data
     total.value = res.data.length
   } catch (error) {
-    ElMessage.error('加载报警列表失败')
+    ElMessage.error(t('alarm.loadFailed'))
   }
 }
 
@@ -168,7 +171,7 @@ const renderCharts = (stats) => {
       },
       xAxis: {
         type: 'category',
-        data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+        data: [t('alarm.monday'), t('alarm.tuesday'), t('alarm.wednesday'), t('alarm.thursday'), t('alarm.friday'), t('alarm.saturday'), t('alarm.sunday')]
       },
       yAxis: {
         type: 'value'
@@ -228,18 +231,18 @@ const renderCharts = (stats) => {
 }
 
 const handleAcknowledge = (row) => {
-  ElMessageBox.prompt('请输入确认人', '确认报警', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
+  ElMessageBox.prompt(t('alarm.enterAcknowledger'), t('alarm.acknowledgeAlarm'), {
+    confirmButtonText: t('common.confirm'),
+    cancelButtonText: t('common.cancel'),
     inputPattern: /.+/,
-    inputErrorMessage: '请输入确认人'
+    inputErrorMessage: t('alarm.enterAcknowledger')
   }).then(async ({ value }) => {
     try {
       await alarmApi.acknowledgeAlarm(row.id, value)
-      ElMessage.success('报警已确认')
+      ElMessage.success(t('alarm.acknowledgeSuccess'))
       loadAlarms()
     } catch (error) {
-      ElMessage.error('确认失败')
+      ElMessage.error(t('alarm.acknowledgeFailed'))
     }
   })
 }
@@ -255,9 +258,9 @@ const getStatusType = (status) => {
 
 const getStatusText = (status) => {
   const texts = {
-    active: '活跃',
-    acknowledged: '已确认',
-    cleared: '已清除'
+    active: t('alarm.active'),
+    acknowledged: t('alarm.acknowledged'),
+    cleared: t('alarm.cleared')
   }
   return texts[status] || status
 }
