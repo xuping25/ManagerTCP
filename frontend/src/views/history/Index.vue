@@ -3,14 +3,14 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>历史数据查询</span>
-          <el-button type="primary" :icon="Download" @click="handleExport">导出数据</el-button>
+          <span>{{ t('history.query') }}</span>
+          <el-button type="primary" :icon="Download" @click="handleExport">{{ t('history.exportData') }}</el-button>
         </div>
       </template>
 
       <el-form :inline="true" :model="queryForm">
-        <el-form-item label="设备">
-          <el-select v-model="queryForm.deviceId" placeholder="请选择设备" @change="handleDeviceChange">
+        <el-form-item :label="t('history.device')">
+          <el-select v-model="queryForm.deviceId" :placeholder="t('history.selectDevice')" @change="handleDeviceChange">
             <el-option
               v-for="device in devices"
               :key="device.id"
@@ -20,8 +20,8 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item label="数据点">
-          <el-select v-model="queryForm.dataPointId" placeholder="请选择数据点">
+        <el-form-item :label="t('history.dataPoint')">
+          <el-select v-model="queryForm.dataPointId" :placeholder="t('history.selectDataPoint')">
             <el-option
               v-for="point in dataPoints"
               :key="point.id"
@@ -31,19 +31,19 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item label="时间范围">
+        <el-form-item :label="t('history.timeRange')">
           <el-date-picker
             v-model="queryForm.dateRange"
             type="datetimerange"
-            range-separator="至"
-            start-placeholder="开始时间"
-            end-placeholder="结束时间"
+            :range-separator="t('alarm.to')"
+            :start-placeholder="t('history.startTime')"
+            :end-placeholder="t('history.endTime')"
           />
         </el-form-item>
 
         <el-form-item>
-          <el-button type="primary" :icon="Search" @click="handleQuery">查询</el-button>
-          <el-button :icon="Refresh" @click="handleReset">重置</el-button>
+          <el-button type="primary" :icon="Search" @click="handleQuery">{{ t('history.queryBtn') }}</el-button>
+          <el-button :icon="Refresh" @click="handleReset">{{ t('history.reset') }}</el-button>
         </el-form-item>
       </el-form>
 
@@ -54,20 +54,20 @@
       </el-row>
 
       <el-table :data="historyData" border stripe style="margin-top: 20px;">
-        <el-table-column prop="timestamp" label="时间" width="180">
+        <el-table-column prop="timestamp" :label="t('history.time')" width="180">
           <template #default="{ row }">
             {{ formatTime(row.timestamp) }}
           </template>
         </el-table-column>
-        <el-table-column prop="value" label="数值" width="120">
+        <el-table-column prop="value" :label="t('history.value')" width="120">
           <template #default="{ row }">
             {{ row.value !== null ? row.value.toFixed(3) : 'N/A' }}
           </template>
         </el-table-column>
-        <el-table-column label="质量" width="100">
+        <el-table-column :label="t('monitor.quality')" width="100">
           <template #default="{ row }">
             <el-tag :type="row.quality === 1 ? 'success' : 'danger'" size="small">
-              {{ row.quality === 1 ? '良好' : '错误' }}
+              {{ row.quality === 1 ? t('monitor.good') : t('monitor.bad') }}
             </el-tag>
           </template>
         </el-table-column>
@@ -89,12 +89,15 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { Search, Refresh, Download } from '@element-plus/icons-vue'
 import { deviceApi } from '@/api/device'
 import { historyApi } from '@/api/history'
 import moment from 'moment'
 import * as echarts from 'echarts'
+
+const { t } = useI18n()
 
 const devices = ref([])
 const dataPoints = ref([])
@@ -120,7 +123,7 @@ const loadDevices = async () => {
     const res = await deviceApi.getAllDevices()
     devices.value = res.data
   } catch (error) {
-    ElMessage.error('加载设备列表失败')
+    ElMessage.error(t('history.loadDevicesFailed'))
   }
 }
 
@@ -130,13 +133,13 @@ const handleDeviceChange = async (deviceId) => {
     dataPoints.value = res.data
     queryForm.value.dataPointId = null
   } catch (error) {
-    ElMessage.error('加载数据点失败')
+    ElMessage.error(t('history.loadDataPointsFailed'))
   }
 }
 
 const handleQuery = async () => {
   if (!queryForm.value.dataPointId) {
-    ElMessage.warning('请选择数据点')
+    ElMessage.warning(t('history.selectDataPoint'))
     return
   }
 
@@ -156,7 +159,7 @@ const handleQuery = async () => {
 
     renderChart(res.data)
   } catch (error) {
-    ElMessage.error('查询失败')
+    ElMessage.error(t('history.queryFailed'))
   }
 }
 
@@ -168,7 +171,7 @@ const renderChart = (data) => {
   if (chartInstance) {
     const option = {
       title: {
-        text: '历史数据趋势'
+        text: t('history.trend')
       },
       tooltip: {
         trigger: 'axis',
@@ -186,7 +189,7 @@ const renderChart = (data) => {
       },
       yAxis: {
         type: 'value',
-        name: '数值'
+        name: t('history.value')
       },
       dataZoom: [{
         type: 'inside',
@@ -197,7 +200,7 @@ const renderChart = (data) => {
         end: 100
       }],
       series: [{
-        name: '数值',
+        name: t('history.value'),
         type: 'line',
         data: data.map(d => d.value),
         smooth: true,
@@ -243,7 +246,7 @@ const handleReset = () => {
 
 const handleExport = async () => {
   if (!queryForm.value.dataPointId) {
-    ElMessage.warning('请先查询数据')
+    ElMessage.warning(t('history.queryFirst'))
     return
   }
 
@@ -265,9 +268,9 @@ const handleExport = async () => {
     link.click()
     document.body.removeChild(link)
 
-    ElMessage.success('导出成功')
+    ElMessage.success(t('history.exportSuccess'))
   } catch (error) {
-    ElMessage.error('导出失败')
+    ElMessage.error(t('history.exportFailed'))
   }
 }
 

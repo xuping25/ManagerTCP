@@ -9,7 +9,7 @@
             </div>
             <div class="stat-info">
               <div class="stat-value">{{ totalDevices }}</div>
-              <div class="stat-label">总设备数</div>
+              <div class="stat-label">{{ t('monitor.totalDevices') }}</div>
             </div>
           </div>
         </el-card>
@@ -22,7 +22,7 @@
             </div>
             <div class="stat-info">
               <div class="stat-value">{{ onlineDevices }}</div>
-              <div class="stat-label">在线设备</div>
+              <div class="stat-label">{{ t('monitor.onlineDevices') }}</div>
             </div>
           </div>
         </el-card>
@@ -35,7 +35,7 @@
             </div>
             <div class="stat-info">
               <div class="stat-value">{{ store.activeAlarmCount }}</div>
-              <div class="stat-label">活跃报警</div>
+              <div class="stat-label">{{ t('monitor.activeAlarms') }}</div>
             </div>
           </div>
         </el-card>
@@ -48,7 +48,7 @@
             </div>
             <div class="stat-info">
               <div class="stat-value">{{ store.realtimeData.size }}</div>
-              <div class="stat-label">实时数据点</div>
+              <div class="stat-label">{{ t('monitor.realtimePoints') }}</div>
             </div>
           </div>
         </el-card>
@@ -59,26 +59,26 @@
       <el-col :span="16">
         <el-card>
           <template #header>
-            <span>实时数据监控</span>
+            <span>{{ t('monitor.realtimeData') }}</span>
           </template>
           <el-table :data="realtimeDataList" height="400" border>
-            <el-table-column prop="deviceName" label="设备名称" width="150" />
-            <el-table-column prop="dataPointName" label="数据点" width="150" />
-            <el-table-column label="当前值" width="120">
+            <el-table-column prop="deviceName" :label="t('monitor.deviceName')" width="150" />
+            <el-table-column prop="dataPointName" :label="t('monitor.dataPointName')" width="150" />
+            <el-table-column :label="t('monitor.currentValue')" width="120">
               <template #default="{ row }">
                 <span :class="{ 'value-good': row.quality === 1, 'value-bad': row.quality === 0 }">
                   {{ row.value !== null ? row.value.toFixed(2) : 'N/A' }}
                 </span>
               </template>
             </el-table-column>
-            <el-table-column label="质量" width="80">
+            <el-table-column :label="t('monitor.quality')" width="80">
               <template #default="{ row }">
                 <el-tag :type="row.quality === 1 ? 'success' : 'danger'" size="small">
-                  {{ row.quality === 1 ? '良好' : '错误' }}
+                  {{ row.quality === 1 ? t('monitor.good') : t('monitor.bad') }}
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column prop="timestamp" label="时间戳" min-width="180">
+            <el-table-column prop="timestamp" :label="t('monitor.timestamp')" min-width="180">
               <template #default="{ row }">
                 {{ formatTime(row.timestamp) }}
               </template>
@@ -90,7 +90,7 @@
       <el-col :span="8">
         <el-card>
           <template #header>
-            <span>最近报警</span>
+            <span>{{ t('monitor.recentAlarms') }}</span>
           </template>
           <div class="alarm-list">
             <div v-for="alarm in recentAlarms" :key="alarm.id" class="alarm-item">
@@ -102,7 +102,7 @@
               </div>
               <div class="alarm-message">{{ alarm.message }}</div>
             </div>
-            <el-empty v-if="recentAlarms.length === 0" description="暂无报警" :image-size="80" />
+            <el-empty v-if="recentAlarms.length === 0" :description="t('common.noData')" :image-size="80" />
           </div>
         </el-card>
       </el-col>
@@ -112,25 +112,25 @@
       <el-col :span="24">
         <el-card>
           <template #header>
-            <span>设备状态</span>
+            <span>{{ t('monitor.deviceStatus') }}</span>
           </template>
           <el-table :data="devices" border>
-            <el-table-column prop="name" label="设备名称" width="150" />
-            <el-table-column prop="protocol" label="协议" width="120" />
-            <el-table-column label="连接地址" min-width="200">
+            <el-table-column prop="name" :label="t('monitor.deviceName')" width="150" />
+            <el-table-column prop="protocol" :label="t('monitor.protocol')" width="120" />
+            <el-table-column :label="t('monitor.connectionAddress')" min-width="200">
               <template #default="{ row }">
                 <span v-if="row.connection_type === 'tcp'">{{ row.host }}:{{ row.port }}</span>
                 <span v-else>{{ row.serial_port }}</span>
               </template>
             </el-table-column>
-            <el-table-column label="状态" width="100">
+            <el-table-column :label="t('common.status')" width="100">
               <template #default="{ row }">
                 <el-tag :type="row.connected ? 'success' : 'danger'">
-                  {{ row.connected ? '在线' : '离线' }}
+                  {{ row.connected ? t('common.online') : t('common.offline') }}
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column label="数据点数量" width="120">
+            <el-table-column :label="t('monitor.dataPointCount')" width="120">
               <template #default="{ row }">
                 {{ getDeviceDataPointCount(row.id) }}
               </template>
@@ -144,11 +144,13 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/store'
 import { deviceApi } from '@/api/device'
 import { Setting, CircleCheck, Bell, DataLine } from '@element-plus/icons-vue'
 import moment from 'moment'
 
+const { t } = useI18n()
 const store = useAppStore()
 const devices = ref([])
 
